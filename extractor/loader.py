@@ -3,7 +3,11 @@ import datetime
 
 class Loader:
     def __init__(self,directory_path):
+        # self.kafka = kafka
         self.directory_path = pathlib.Path(directory_path)
+        # async def load_and_publish:
+        #     for file in self.directory_path.iterdir():
+
 
     def extract_meta_data(self):
         files = []
