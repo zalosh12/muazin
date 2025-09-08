@@ -3,6 +3,9 @@ from manager import Manager
 from producer import KafkaProducer
 import os
 import asyncio
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 async def main():

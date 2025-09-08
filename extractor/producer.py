@@ -3,11 +3,13 @@ import json
 import asyncio
 import logging
 from aiokafka import AIOKafkaProducer
+import config
 
 
 logger = logging.getLogger(__name__)
 
-KAFKA_BROKER_URL = os.getenv("KAFKA_BROKER_URL", "localhost:9092")
+# KAFKA_BROKER_URL = os.getenv("KAFKA_BROKER_URL", "localhost:9092")
+KAFKA_BROKER_URL = config.KAFKA_BROKER_URL
 
 class KafkaProducer:
     def __init__(self):
