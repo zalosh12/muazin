@@ -3,6 +3,7 @@ import logging
 from db_handler import MongoDB
 from consumer import KafkaConsumer
 from persister_manager import Persister
+from es_handler import EsClient
 
 logging.basicConfig(
     level=logging.INFO,
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 async def main() :
     mongo = MongoDB()
     kafka = KafkaConsumer()
+    es = EsClient()
 
     # Create a Future that will never resolve, keeping the event loop alive
     # This will be cancelled when KeyboardInterrupt or other exception occurs
@@ -23,8 +25,10 @@ async def main() :
         await mongo.connect()
         # Then start Kafka consumer
         await kafka.start_consumer()
+        # Connect to elasticsearch
+        await es.connect()
 
-        persister = Persister(mongo, kafka)
+        persister = Persister(mongo, kafka,es)
 
         # Start the consumer and persister task in the background
         # This allows the main coroutine to then wait on the stop_event
@@ -52,6 +56,7 @@ async def main() :
 
         await kafka.stop_consumer()
         mongo.close()
+        await es.close()
         logger.info("Application gracefully shut down.")
 
 
