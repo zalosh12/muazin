@@ -1,6 +1,5 @@
-import asyncio
 from elasticsearch import AsyncElasticsearch
-from config import ES_API_KEY,ES_CLOUD_ID
+from persister.src.config import ES_API_KEY,ES_CLOUD_ID
 import logging
 
 logger = logging.getLogger(__name__)

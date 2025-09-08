@@ -1,9 +1,9 @@
 import asyncio
 import logging
-from db_handler import MongoDB
-from consumer import KafkaConsumer
+from persister.src.db_handler import MongoDB
+from persister.src.consumer import KafkaConsumer
 from persister_manager import Persister
-from es_handler import EsClient
+from persister.src.es_handler import EsClient
 
 logging.basicConfig(
     level=logging.INFO,

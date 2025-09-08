@@ -1,6 +1,6 @@
-from loader import Loader
-from manager import Manager
-from producer import KafkaProducer
+from extractor.src.loader import Loader
+from extractor.src.manager import Manager
+from extractor.src.producer import KafkaProducer
 import os
 import asyncio
 import logging
@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    loader = Loader(os.getenv("DIRECTORY_PATH",r"C:\Users\eliwa\podcasts_project\podcasts"))
+    loader = Loader(directory_path=os.getenv("DIRECTORY_PATH",r"C:\Users\eliwa\podcasts_project\podcasts"))
     docs = loader.extract_meta_data()
 
     kafka = KafkaProducer()

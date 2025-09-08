@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
-from es_handler import EsClient
+import aiofiles
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,11 @@ class Persister:
                 fs = AsyncIOMotorGridFSBucket(self.db.db)
                 #read the file content in binary format
                 try:
-                    with open(msg["path"], 'rb') as f :
-                        file_data = f.read()
+                    async with aiofiles.open(msg["path"], 'rb') as f :
+                        file_data =  await f.read()
                 except FileNotFoundError :
                     logger.error(f"Error: WAV file not found ")
+                    continue
 
                 #upload the file content to mongo data base
                 file_id = await fs.upload_from_stream_with_id(
