@@ -3,7 +3,7 @@ from persister.src.db_handler import MongoDB
 from persister.src.consumer import KafkaConsumer
 from persister.src.producer import KafkaProducer
 from persister_manager import Persister
-from persister.src.es_handler import EsClient
+# from persister.src.es_handler import EsClient
 from utils.logger import Logger
 
 
@@ -13,7 +13,6 @@ async def main() :
     mongo = MongoDB()
     kafka_consumer = KafkaConsumer()
     kafka_producer = KafkaProducer()
-    es = EsClient()
 
     # Create a Future that will never resolve, keeping the event loop alive
     # This will be cancelled when KeyboardInterrupt or other exception occurs
@@ -24,12 +23,13 @@ async def main() :
         await mongo.connect()
         # Then start Kafka consumer
         await kafka_consumer.start_consumer()
-        # Connect to elasticsearch
+        # start kafka producer
         await kafka_producer.start_producer()
 
-        await es.connect()
 
-        persister = Persister(db=mongo, kafka_producer=kafka_producer,kafka_consumer=kafka_consumer,es_client=es)
+        persister = Persister(db=mongo,
+                              kafka_producer=kafka_producer,
+                              kafka_consumer=kafka_consumer)
 
         # Start the consumer and persister task in the background
         # This allows the main coroutine to then wait on the stop_event
@@ -56,12 +56,12 @@ async def main() :
                 logger.error(f"Error during persister task cancellation: {e}", exc_info=True)
             finally:
                 await kafka_consumer.stop_consumer()
+                await kafka_producer.stop_producer()
                 mongo.close()
-                await es.close()
 
-        await kafka_producer.stop_consumer()
+        await kafka_consumer.stop_consumer()
+        await kafka_producer.stop_producer()
         mongo.close()
-        await es.close()
         logger.info("Application gracefully shut down.")
 
 

@@ -11,8 +11,6 @@ class Persister:
         self.db = db
         self.kafka_producer = kafka_producer
         self.kafka_consumer = kafka_consumer
-        # self.es = es_client
-        # self.collection = "meta_data_and_files"
 
     async def consume_and_persist(self):
         """ consume messages from kafka and create unique id
@@ -42,10 +40,6 @@ class Persister:
                 logger.info(f'WAV file {msg.get("file_name")} uploaded successfully with GridFS ID: {_id}')
 
                 msg['file_id'] = _id
-
-
-                # indexing a document into elasticsearch
-                # await self.es.index_doc(doc_id=_id,doc=msg)
 
                 await self.kafka_producer.publish(topic="podcasts_data_to_transcribe",message=msg)
 
