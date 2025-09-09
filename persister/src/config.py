@@ -14,6 +14,6 @@ KAFKA_BROKER_URL ="localhost:9092"
 # KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
 # KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID")
 
-ES_HOST = "http://localhost:9200"
+ES_HOST = os.getenv("ES_HOST","http://localhost:9200")
 ES_API_KEY = "dnU2OEZKa0JCdTRNMlhuRkxwejI6eldGdmQwTDkza1VMbHpPYzg3ZkFUQQ"
 ES_CLOUD_ID = "zalosh:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvOjQ0MyRhNTc1MWUyOTUzMmQ0NGMzOWI3M2U2NDI1ZjBiZTNhNSRjYjI4ZDUwZGQ5NmU0YTg0YjJkZTA5YmRiMzI1NzViOQ=="

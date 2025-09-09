@@ -1,8 +1,11 @@
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from persister.src.config import MDB_URI, DB_NAME
+from utils.logger import Logger
 
-logger = logging.getLogger(__name__)
+
+# logger = logging.getLogger(__name__)
+logger = Logger.get_logger()
 
 class MongoDB :
     def __init__(self) :
@@ -11,7 +14,7 @@ class MongoDB :
 
     async def connect(self) :
         try:
-            logging.info("Connecting to MongoDB...")
+            logger.info("Connecting to MongoDB...")
             self.client = AsyncIOMotorClient(MDB_URI)
             await self.client.admin.command('ismaster')
             self.db = self.client[DB_NAME]

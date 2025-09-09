@@ -1,8 +1,14 @@
 from elasticsearch import AsyncElasticsearch
 from persister.src.config import ES_API_KEY,ES_CLOUD_ID
+from utils.logger import Logger
+from config import ES_HOST
 import logging
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+
+logger = Logger.get_logger()
+
+
 
 
 class EsClient:
@@ -13,13 +19,10 @@ class EsClient:
     async def connect(self):
         try:
             logger.info("connecting to elasticsearch")
-            self.client = AsyncElasticsearch(
-                cloud_id=ES_CLOUD_ID,
-                api_key=ES_API_KEY
-            )
+            self.client = AsyncElasticsearch(ES_HOST)
+
         except Exception as e:
             logger.error(f"failed to connect to elasticsearch:{e}",exc_info=True)
-
 
 
     async def create_index(self) :
@@ -30,8 +33,7 @@ class EsClient:
         logger.info(f"Document indexed in {doc_id}")
 
     async def close(self) :
-
         if self.client :
             await self.client.close()
-            print("Elasticsearch connection closed")
+            logger.info("Elasticsearch connection closed")
 

@@ -3,9 +3,11 @@ import json
 import asyncio
 import logging
 from aiokafka import AIOKafkaConsumer
+from utils.logger import Logger
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("KafkaConsumer")
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger("KafkaConsumer")
+logger = Logger.get_logger()
 
 KAFKA_BROKER_URL= "localhost:9092"
 # KAFKA_BROKER_URL = os.getenv("KAFKA_BROKER_URL", "localhost:9092")
@@ -21,7 +23,7 @@ class KafkaConsumer:
         self.consumer = AIOKafkaConsumer(
             self.topic,
             bootstrap_servers=KAFKA_BROKER_URL,
-            # group_id="persister_group",
+            group_id="persister_group",
             auto_offset_reset="earliest",
             value_deserializer=lambda v: json.loads(v.decode("utf-8"))
         )

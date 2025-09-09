@@ -4,12 +4,15 @@ from persister.src.db_handler import MongoDB
 from persister.src.consumer import KafkaConsumer
 from persister_manager import Persister
 from persister.src.es_handler import EsClient
+from utils.logger import Logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
+# logger = logging.getLogger(__name__)
+
+logger = Logger.get_logger()
 
 async def main() :
     mongo = MongoDB()
@@ -53,6 +56,10 @@ async def main() :
                 logger.info("Persister task successfully cancelled.")
             except Exception as e:
                 logger.error(f"Error during persister task cancellation: {e}", exc_info=True)
+            finally:
+                await kafka.stop_consumer()
+                mongo.close()
+                await es.close()
 
         await kafka.stop_consumer()
         mongo.close()
