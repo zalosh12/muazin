@@ -1,19 +1,27 @@
 from elasticsearch import AsyncElasticsearch
-from persister.src.config import ES_API_KEY,ES_CLOUD_ID
 from utils.logger import Logger
-from config import ES_HOST
-import logging
+from stt_service.src.config import ES_HOST
 
 # logger = logging.getLogger(__name__)
 
 logger = Logger.get_logger()
 
+mappings = {
+    "properties": {
+        "path": {"type": "keyword"},
+        "file_size": {"type": "keyword"},
+        "file_name": {"type": "keyword"},
+        "created_at": {"type": "keyword"},
+        "file_id":{"type": "keyword"},
+        "transcript":{"type": "text"}
+    }
+}
 
 
 
 
 class EsClient:
-    def __init__(self,index_name="podcasts_data"):
+    def __init__(self,index_name="podcasts_data_transcript"):
         self.index_name = index_name
         self.client = None
 
@@ -27,7 +35,7 @@ class EsClient:
 
 
     async def create_index(self) :
-        await self.client.indices.create(index=self.index_name, ignore=400)
+        await self.client.indices.create(index=self.index_name, ignore=400,mappings=mappings)
 
     async def index_doc(self,doc, doc_id):
         await self.client.index(index=self.index_name, id=doc_id, document=doc)
@@ -37,4 +45,3 @@ class EsClient:
         if self.client :
             await self.client.close()
             logger.info("Elasticsearch connection closed")
-

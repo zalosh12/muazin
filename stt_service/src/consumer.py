@@ -17,13 +17,13 @@ KAFKA_BROKER_URL= "localhost:9092"
 class KafkaConsumer:
     def __init__(self):
         self.consumer = None
-        self.topic = os.getenv("TOPIC_NAME","podcasts_data")
+        self.topic = os.getenv("TOPIC_NAME","podcasts_data_to_transcribe")
 
     async def start_consumer(self):
         self.consumer = AIOKafkaConsumer(
             self.topic,
             bootstrap_servers=KAFKA_BROKER_URL,
-            group_id="persister_group",
+            group_id="stt_group",
             auto_offset_reset="earliest",
             value_deserializer=lambda v: json.loads(v.decode("utf-8"))
         )
@@ -45,5 +45,3 @@ class KafkaConsumer:
                 yield msg.value
         except Exception as e:
             logger.error(f"Error while consuming: {e}")
-
-

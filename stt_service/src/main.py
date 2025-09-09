@@ -1,18 +1,17 @@
 import asyncio
-from persister.src.db_handler import MongoDB
-from persister.src.consumer import KafkaConsumer
-from persister.src.producer import KafkaProducer
-from persister_manager import Persister
-from persister.src.es_handler import EsClient
+from stt_service.src.db_handler import MongoDB
+from stt_service.src.consumer import KafkaConsumer
+from stt_service.src.es_handler import EsClient
+from stt_service.src.transcriber_manager import TranscriberManager
 from utils.logger import Logger
+
 
 
 logger = Logger.get_logger()
 
 async def main() :
     mongo = MongoDB()
-    kafka_consumer = KafkaConsumer()
-    kafka_producer = KafkaProducer()
+    kafka = KafkaConsumer()
     es = EsClient()
 
     # Create a Future that will never resolve, keeping the event loop alive
@@ -23,17 +22,17 @@ async def main() :
         # Connect to MongoDB first
         await mongo.connect()
         # Then start Kafka consumer
-        await kafka_consumer.start_consumer()
+        await kafka.start_consumer()
         # Connect to elasticsearch
-        await kafka_producer.start_producer()
-
         await es.connect()
 
-        persister = Persister(db=mongo, kafka_producer=kafka_producer,kafka_consumer=kafka_consumer,es_client=es)
+        await es.create_index()
+
+        transcriber = TranscriberManager(mongo, kafka,es)
 
         # Start the consumer and persister task in the background
         # This allows the main coroutine to then wait on the stop_event
-        persister_task = asyncio.create_task(persister.consume_and_persist())
+        transcriber_task = asyncio.create_task(transcriber.consume_and_transcribe())
 
         # Wait indefinitely, keeping the event loop alive
         # This will be cancelled by KeyboardInterrupt
@@ -46,20 +45,20 @@ async def main() :
     finally :
         logger.info("Initiating graceful shutdown of services...")
         # Ensure the persister task is cancelled if it's still running
-        if 'persister_task' in locals() and not persister_task.done():
-            persister_task.cancel()
+        if 'transcriber_task' in locals() and not transcriber_task.done():
+            transcriber_task.cancel()
             try:
-                await persister_task # Await to allow proper cleanup within the task if needed
+                await transcriber_task # Await to allow proper cleanup within the task if needed
             except asyncio.CancelledError:
                 logger.info("Persister task successfully cancelled.")
             except Exception as e:
                 logger.error(f"Error during persister task cancellation: {e}", exc_info=True)
             finally:
-                await kafka_consumer.stop_consumer()
+                await kafka.stop_consumer()
                 mongo.close()
                 await es.close()
 
-        await kafka_producer.stop_consumer()
+        await kafka.stop_consumer()
         mongo.close()
         await es.close()
         logger.info("Application gracefully shut down.")

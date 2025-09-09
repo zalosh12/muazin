@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 import aiofiles
 from utils.logger import Logger
@@ -8,21 +7,22 @@ logger = Logger.get_logger()
 # logger = logging.getLogger(__name__)
 
 class Persister:
-    def __init__(self, db, kafka, es_client):
+    def __init__(self, db, kafka_producer,kafka_consumer):
         self.db = db
-        self.kafka = kafka
-        self.es = es_client
+        self.kafka_producer = kafka_producer
+        self.kafka_consumer = kafka_consumer
+        # self.es = es_client
         # self.collection = "meta_data_and_files"
 
     async def consume_and_persist(self):
         """ consume messages from kafka and create unique id
         for each document load the file content from path and store it
-        in mongo db and indexing the metadata document in elasticsearch"""
+        in mongo db and sending the metadata to kafka"""
         logger.info("Starting message consumption and persistence...")
 
         fs = AsyncIOMotorGridFSBucket(self.db.db)
 
-        async for msg in self.kafka.get_messages():
+        async for msg in self.kafka_consumer.get_messages():
             try:
                 _id = f"{msg['created_at']}_{msg['file_size']}"
                 #read the file content in binary format
@@ -41,9 +41,13 @@ class Persister:
                     metadata={"contentType" : "audio/wav"})
                 logger.info(f'WAV file {msg.get("file_name")} uploaded successfully with GridFS ID: {_id}')
 
+                msg['file_id'] = _id
+
 
                 # indexing a document into elasticsearch
-                await self.es.index_doc(doc_id=_id,doc=msg)
+                # await self.es.index_doc(doc_id=_id,doc=msg)
+
+                await self.kafka_producer.publish(topic="podcasts_data_to_transcribe",message=msg)
 
             except Exception as e:
                 logger.error(f"Error occured {e}")
