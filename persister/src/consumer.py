@@ -1,16 +1,12 @@
 import os
 import json
-import asyncio
-import logging
 from aiokafka import AIOKafkaConsumer
 from utils.logger import Logger
 
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger("KafkaConsumer")
+
 logger = Logger.get_logger()
 
-KAFKA_BROKER_URL= "localhost:9092"
-# KAFKA_BROKER_URL = os.getenv("KAFKA_BROKER_URL", "localhost:9092")
+KAFKA_BROKER_URL = os.getenv("KAFKA_BROKER_URL", "localhost:9092")
 
 
 

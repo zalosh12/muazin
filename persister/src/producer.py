@@ -1,7 +1,7 @@
 import json
 import logging
 from aiokafka import AIOKafkaProducer
-from extractor.src import config
+from persister.src import config
 
 logger = logging.getLogger(__name__)
 

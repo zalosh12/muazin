@@ -1,5 +1,4 @@
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
-import aiofiles
 from utils.logger import Logger
 import speech_recognition as sr
 import io
@@ -39,10 +38,11 @@ class TranscriberManager:
 
                 msg['transcript'] = transcript
 
-                results = self.analyzer.analyze('transcript')
+                results = self.analyzer.analyze(transcript)
 
                 for k,v in results.items():
                     msg[k] = v
+                logger.info(f"analyze message: {msg}")
 
                 await self.es.index_doc(doc_id=msg['file_id'],doc=msg)
 

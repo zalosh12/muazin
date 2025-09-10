@@ -2,7 +2,6 @@ from elasticsearch import AsyncElasticsearch
 from utils.logger import Logger
 from stt_service.src.config import ES_HOST
 
-# logger = logging.getLogger(__name__)
 
 logger = Logger.get_logger()
 

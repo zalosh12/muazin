@@ -1,10 +1,8 @@
-import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from stt_service.src.config import MDB_URI, DB_NAME
 from utils.logger import Logger
 
 
-# logger = logging.getLogger(__name__)
 logger = Logger.get_logger()
 
 class MongoDB :

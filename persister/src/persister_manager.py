@@ -1,10 +1,9 @@
-import asyncio
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 import aiofiles
 from utils.logger import Logger
 
 logger = Logger.get_logger()
-# logger = logging.getLogger(__name__)
+
 
 class Persister:
     def __init__(self, db, kafka_producer,kafka_consumer):
