@@ -3,7 +3,10 @@ from stt_service.src.db_handler import MongoDB
 from stt_service.src.consumer import KafkaConsumer
 from stt_service.src.es_handler import EsClient
 from stt_service.src.transcriber_manager import TranscriberManager
+from stt_service.src.analyzer import AnalyzeText
+from stt_service.src.config import high_hostile_words,low_hostile_words
 from utils.logger import Logger
+
 
 
 
@@ -13,6 +16,7 @@ async def main() :
     mongo = MongoDB()
     kafka = KafkaConsumer()
     es = EsClient()
+    text_analyzer = AnalyzeText(high_hostile_words,low_hostile_words)
 
     # Create a Future that will never resolve, keeping the event loop alive
     # This will be cancelled when KeyboardInterrupt or other exception occurs
@@ -28,9 +32,9 @@ async def main() :
 
         await es.create_index()
 
-        transcriber = TranscriberManager(mongo, kafka,es)
+        transcriber = TranscriberManager(mongo, kafka,es,text_analyzer)
 
-        # Start the consumer and persister task in the background
+        # Start the consumer and transcriber task in the background
         # This allows the main coroutine to then wait on the stop_event
         transcriber_task = asyncio.create_task(transcriber.consume_and_transcribe())
 
@@ -44,19 +48,15 @@ async def main() :
         logger.critical(f"An unhandled error occurred in main: {e}", exc_info=True)
     finally :
         logger.info("Initiating graceful shutdown of services...")
-        # Ensure the persister task is cancelled if it's still running
+        # Ensure the transcriber task is cancelled if it's still running
         if 'transcriber_task' in locals() and not transcriber_task.done():
             transcriber_task.cancel()
             try:
                 await transcriber_task # Await to allow proper cleanup within the task if needed
             except asyncio.CancelledError:
-                logger.info("Persister task successfully cancelled.")
+                logger.info("Transcriber task successfully cancelled.")
             except Exception as e:
-                logger.error(f"Error during persister task cancellation: {e}", exc_info=True)
-            finally:
-                await kafka.stop_consumer()
-                mongo.close()
-                await es.close()
+                logger.error(f"Error during transcriber task cancellation: {e}", exc_info=True)
 
         await kafka.stop_consumer()
         mongo.close()

@@ -13,7 +13,10 @@ mappings = {
         "file_name": {"type": "keyword"},
         "created_at": {"type": "keyword"},
         "file_id":{"type": "keyword"},
-        "transcript":{"type": "text"}
+        "transcript":{"type": "text"},
+        "is_bds":{"type": "boolean"},
+        "bds_percent":{"type":"double"},
+        "bds_threat_level":{"type":"keyword"}
     }
 }
 

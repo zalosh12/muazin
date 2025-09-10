@@ -8,11 +8,12 @@ import io
 logger = Logger.get_logger()
 
 class TranscriberManager:
-    def __init__(self, db, kafka, es_client) :
+    def __init__(self, db, kafka, es_client,analyzer) :
         self.db = db
         self.kafka = kafka
         self.es = es_client
         self.recognizer = sr.Recognizer()
+        self.analyzer = analyzer
 
     async def consume_and_transcribe(self):
         logger.info("Starting message consumption and persistence...")
@@ -38,20 +39,14 @@ class TranscriberManager:
 
                 msg['transcript'] = transcript
 
+                results = self.analyzer.analyze('transcript')
+
+                for k,v in results.items():
+                    msg[k] = v
+
                 await self.es.index_doc(doc_id=msg['file_id'],doc=msg)
 
 
-        # async for msg in self.kafka.get_messages() :
-        #     try :
-        #         file_id = msg.get("file_id")
-        #         if not file_id :
-        #             logger.warning(f"No file_id found in message: {msg}")
-        #             continue
-        #
-        #         stream = await fs.open_download_stream(file_id)
-        #         data = await stream.read()
-        #         await stream.close()
-        #         logger.info(type(data))
 
             except Exception as e:
                 logger.error(f"Error occured {e}")
@@ -76,22 +71,6 @@ class TranscriberManager:
             logger.error(f"STT error: {e}", exc_info=True)
             return ""
 
-    # async def _transcribe_audio(self, src_file):
-    #         recognizer = sr.Recognizer()
-    #         try :
-    #             audio_data = sr.AudioFile(src_file)
-    #             # with audio_data as source :
-    #             #     audio = recognizer.record(source)
-    #
-    #             transcript = self.recognizer.recognize_google(audio, language="en-US")
-    #             logger.info("Audio successfully transcribed.")
-    #             return transcript
-    #         except sr.UnknownValueError :
-    #             logger.warning("Could not understand audio.")
-    #             return ""
-    #         except Exception as e :
-    #             logger.error(f"STT error: {e}", exc_info=True)
-    #             return ""
 
 
 

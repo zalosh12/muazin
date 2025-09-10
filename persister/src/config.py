@@ -16,3 +16,11 @@ KAFKA_BROKER_URL ="localhost:9092"
 # KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID")
 
 ES_HOST = os.getenv("ES_HOST","http://localhost:9200")
+
+high_hostile_words = """R2Vub2NpZGUsV2FyIENyaW1lcyxBcGFydGhlaWQsTWF
+zc2FjcmUsTmFrYmEsRGlzc
+GxhY2VtZW50LEh1bWFuaXRhcmlhbiBDcmlzaXMsQmxvY2thZGUsT2NjdXBhdGlvbixS
+ZWZ1Z2VlcyxJQ0MsQkRT"""
+low_hostile_words="""RnJlZWRvbSBGbG90aWxsYSxSZXNpc
+3RhbmNlLExpYmVyYXRpb24sRnJlZSBQYWxlc3RpbmUsR2F6YSx
+DZWFzZWZpcmUsUHJvdGVzdCxVTlJXQQ=="""
